@@ -5,12 +5,14 @@ import itertools
 import subprocess
 import youtube_dl
 from selenium import webdriver
+from selenium.common.exceptions import WebDriverException
 
-episode_link = 'http://www.cc.com/video-clips/wbjagy/the-daily-show-with-jon-stewart-headlines---rockey-road-to-dc'
+episode_link = 'http://www.cc.com/episodes/zv5c3q/the-colbert-report-october-16--2007---bob-drogin-season-3-ep-03132'
 
 if os.path.exists('temporary'):
     shutil.rmtree('temporary')
 os.makedirs('temporary')
+os.makedirs('output', exist_ok=True)
 
 chrome_options = webdriver.ChromeOptions()
 chrome_options.add_argument('--headless')
@@ -25,10 +27,12 @@ with youtube_dl.YoutubeDL(youtube_dl_options) as downloader:
         next_link = episode_link
         for index in itertools.count():
             browser.get(next_link)
-            time.sleep(1)
-            embed_button = browser.find_element_by_css_selector('.player_share-button.embed.button')
+            time.sleep(2)
             current_thumb_nail = browser.find_element_by_css_selector('.item.is-selected')
-            next_thumb_nail = current_thumb_nail.find_element_by_xpath('following-sibling::div')
+            if index == 0:
+                next_thumb_nail = current_thumb_nail
+            else:
+                next_thumb_nail = current_thumb_nail.find_element_by_xpath('following-sibling::div')
             anchor = next_thumb_nail.find_element_by_tag_name('a')
             anchor_header = anchor.find_element_by_class_name('meta-wrap').find_element_by_class_name('header')
             anchor_date_string = anchor_header.find_elements_by_tag_name('span')[1].text
@@ -40,7 +44,7 @@ with youtube_dl.YoutubeDL(youtube_dl_options) as downloader:
             downloader.download([next_link])
         print(next_link)
         browser.quit()
-    except Exception as error:
+    except WebDriverException as error:
         browser.quit()
         raise error
 
@@ -52,3 +56,4 @@ with open('temporary/concat.txt', 'a+') as concat_file:
 ffmpeg_call_list = ['ffmpeg', '-y', '-f', 'concat', '-i', 'temporary/concat.txt',
                     'output/{}.mp4'.format(episode_date_string)]
 subprocess.call(ffmpeg_call_list)
+print('Done.')
