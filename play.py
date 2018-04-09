@@ -52,7 +52,8 @@ episode_date_string = episode_date_string.replace('/', '-')
 clip_list = sorted(os.listdir('temporary'))
 with open('temporary/concat.txt', 'a+') as concat_file:
     for clip_name in clip_list:
-        concat_file.write('file {}\n'.format(clip_name))
+        if not clip_name.startswith('.'):
+            concat_file.write('file {}\n'.format(clip_name))
 ffmpeg_call_list = ['ffmpeg', '-y', '-f', 'concat', '-i', 'temporary/concat.txt',
                     'output/{}.mp4'.format(episode_date_string)]
 subprocess.call(ffmpeg_call_list)
