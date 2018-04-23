@@ -7,7 +7,7 @@ import youtube_dl
 from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
 
-episode_link = 'http://www.cc.com/episodes/zv5c3q/the-colbert-report-october-16--2007---bob-drogin-season-3-ep-03132'
+episode_link = 'http://www.cc.com/episodes/0tro1o/the-daily-show-with-jon-stewart-january-30--2007---neil-degrasse-tyson-season-12-ep-12014'
 
 if os.path.exists('temporary'):
     shutil.rmtree('temporary')
@@ -17,10 +17,10 @@ os.makedirs('output', exist_ok=True)
 chrome_options = webdriver.ChromeOptions()
 chrome_options.add_argument('--headless')
 chrome_options.add_argument('--disable-gpu')
-chrome_options.add_argument("--mute-audio")
+chrome_options.add_argument('--mute-audio')
 browser = webdriver.Chrome(chrome_options=chrome_options)
 
-youtube_dl_options = {'outtmpl': 'temporary/%(autonumber)s.%(ext)s'}
+youtube_dl_options = {'outtmpl': 'temporary{}%(autonumber)s.%(ext)s'.format(os.path.sep)}
 episode_date_string = None
 with youtube_dl.YoutubeDL(youtube_dl_options) as downloader:
     try:
@@ -50,11 +50,11 @@ with youtube_dl.YoutubeDL(youtube_dl_options) as downloader:
 
 episode_date_string = episode_date_string.replace('/', '-')
 clip_list = sorted(os.listdir('temporary'))
-with open('temporary/concat.txt', 'a+') as concat_file:
+with open(os.path.join('temporary', 'concat.txt'), 'a+') as concat_file:
     for clip_name in clip_list:
         if not clip_name.startswith('.'):
             concat_file.write('file {}\n'.format(clip_name))
-ffmpeg_call_list = ['ffmpeg', '-y', '-f', 'concat', '-i', 'temporary/concat.txt',
-                    'output/{}.mp4'.format(episode_date_string)]
+ffmpeg_call_list = ['ffmpeg', '-y', '-f', 'concat', '-i', os.path.join('temporary', 'concat.txt'),
+                    os.path.join('output', '{}.mp4'.format(episode_date_string))]
 subprocess.call(ffmpeg_call_list)
 print('Done.')
