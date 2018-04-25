@@ -8,4 +8,4 @@ I made this script for my own personal use, and is it not particularly well made
 
 Only tested on MacOS, but I am confident it will work on most Unix OSes. It might work on Windows.
 
-Requires Python 3, all the pip packages used, FFmpeg, and the Chrome driver for Selenium.
+Requires Python 3, pip packages listed in requirements.txt, FFmpeg, and the Chrome driver for Selenium.
