@@ -1,5 +1,6 @@
 import os
 import time
+import sys
 import shutil
 import itertools
 import subprocess
@@ -7,7 +8,7 @@ import youtube_dl
 from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
 
-episode_link = 'http://www.cc.com/episodes/0tro1o/the-daily-show-with-jon-stewart-january-30--2007---neil-degrasse-tyson-season-12-ep-12014'
+episode_link = sys.argv[1]
 
 if os.path.exists('temporary'):
     shutil.rmtree('temporary')
