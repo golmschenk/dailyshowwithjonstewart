@@ -1,7 +1,9 @@
 """
 Code for getting a list of all the episode links.
 """
+from datetime import datetime, date
 import os
+import re
 import time
 from selenium import webdriver
 from selenium.common.exceptions import WebDriverException, NoSuchElementException
@@ -27,11 +29,11 @@ def obtain_episode_list(show='daily_show', output_path=None):
     chrome_options.add_argument('--mute-audio')
     browser = webdriver.Chrome(chrome_options=chrome_options)
     try:
-        browser.get(episode_guide_link)
-        time.sleep(5)
         first_episode_found = False
         print('Listing all episodes. This needs to wait for the site\'s javascript as it repeatedly clicks a "load '
               'more" button, so it will take a little while.')
+        browser.get(episode_guide_link)
+        time.sleep(5)
         while not first_episode_found:
             first_episodes = browser.find_elements_by_xpath("//*[contains(text(), '{}')]".format(first_episode_name))
             if len(first_episodes) > 0:
@@ -57,6 +59,41 @@ def obtain_episode_list(show='daily_show', output_path=None):
     return output_path
 
 
+def generate_unwatched_list(include_daily_show=True, include_colbert_report=True):
+    list_file_paths_to_include = []
+    if include_daily_show:
+        daily_show_episode_list_file_path = 'daily_show{}'.format(episode_list_file_name_suffix)
+        if not os.path.exists(daily_show_episode_list_file_path):
+            print('Getting Daily Show list...')
+            obtain_episode_list('daily_show', daily_show_episode_list_file_path)
+        list_file_paths_to_include.append(daily_show_episode_list_file_path)
+    if include_colbert_report:
+        colbert_report_episode_list_file_path = 'colbert_report{}'.format(episode_list_file_name_suffix)
+        if not os.path.exists(colbert_report_episode_list_file_path):
+            print('Getting Colbert Report list...')
+            obtain_episode_list('colbert_report', colbert_report_episode_list_file_path)
+        list_file_paths_to_include.append(colbert_report_episode_list_file_path)
+    episode_list = []
+    for list_file_path in list_file_paths_to_include:
+        with open(list_file_path) as list_file:
+            episode_list += list_file.readlines()
+    episode_list = [episode for episode in episode_list if episode != '\n']  # Remove empty lines.
+    episode_list = list(dict.fromkeys(episode_list))  # Remove duplicates.
+    episode_list.sort(key=episode_date_from_link)  # Order by date.
+    with open('unwatched_episode_list.txt', 'w') as unwatched_episode_list_file:
+        unwatched_episode_list_file.writelines(episode_list)
+
+
+def episode_date_from_link(episode_link):
+    date_pattern = r'-([a-z]+)-(\d{1,2})--(\d{4})-(-|season)'
+    match = re.search(date_pattern, episode_link)
+    year = int(match.group(3))
+    # Handle all the misspellings in the links.
+    month_string = match.group(1).replace('feburary', 'february').replace(
+        'februrary', 'february').replace('janurary', 'january').replace('januraray', 'january')
+    month = datetime.strptime(month_string, '%B').month
+    day = int(match.group(2))
+    return date(year=year, month=month, day=day)
+
 if __name__ == '__main__':
-    pass
-    #generate_unwatched_list(include_colbert_report=False)
+    generate_unwatched_list()
