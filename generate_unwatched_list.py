@@ -95,5 +95,6 @@ def episode_date_from_link(episode_link):
     day = int(match.group(2))
     return date(year=year, month=month, day=day)
 
+
 if __name__ == '__main__':
     generate_unwatched_list()

@@ -13,7 +13,7 @@ from selenium.common.exceptions import WebDriverException
 
 
 def download_episode(episode_link):
-    print('Downloading {}'.format(episode_link))
+    print('Downloading {}.'.format(episode_link.strip()))
     if os.path.exists('temporary'):
         shutil.rmtree('temporary')
     os.makedirs('temporary')
@@ -61,7 +61,7 @@ def download_episode(episode_link):
                         os.path.join('output', '{}.mp4'.format(episode_date_string))]
     print('Combining clips.', end='\r')
     subprocess.run(ffmpeg_call_list)
-    print('Finished downloading {}.'.format(episode_link))
+    print('Finished downloading {}.'.format(episode_link.strip()))
 
 
 def download_unwatched_episode(random_order=False):
