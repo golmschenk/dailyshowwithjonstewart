@@ -1,6 +1,6 @@
 # The Daily Show with Jon Stewart Episode Downloader
 
-_NOTE: The layout of the archived pages has been changed and this script does not currently work._
+## NOTE: The layout of the archived pages has been changed and this script does not currently work.
 
 A simple script to download and combine the clips of the Daily Show with Jon Stewart into a full episode. Works for other shows such as the Colbert Report as well. This script was made because viewing these episodes through Comedy Central's online player is not a pleasant experience.
 
